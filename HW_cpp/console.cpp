@@ -49,7 +49,7 @@ class Console
 	    return phonenum_int;
 	}
 
-	Person* addPerson()
+	Person addPerson()
 	{
 	    string fname, lname, phonenum;
 
@@ -59,15 +59,13 @@ class Console
 	    cin >> phonenum;
 	    int phonenum_int = string_to_int(phonenum);
 
-	    Person *ptr;
-
-	    ptr = new Person(Person(fname, lname, phonenum_int));
+	    Person p(fname, lname, phonenum_int);
 	    cout << "Succesfully added new person." << endl;
 
-	    return ptr;
+	    return p;
 	}
 
-	Work* addWork()
+	Work addWork()
 	{
 	    string fname, lname, phonenum, team;
 
@@ -79,15 +77,13 @@ class Console
 	    cin >> team;
 	    int phonenum_int = string_to_int(phonenum);
 
-	    Work *ptr;
-
-	    ptr = new Work(Work(fname, lname, phonenum_int, team));
+	    Work w(fname, lname, phonenum_int, team);
 	    cout << "Succesfully added new person." << endl;
 
-	    return ptr;
+	    return w;
 	}
 
-	Family* addFamily()
+	Family addFamily()
 	{
 	    string fname, lname, phonenum, birthday;
 
@@ -99,15 +95,13 @@ class Console
 	    cin >> birthday;
 	    int phonenum_int = string_to_int(phonenum);
 
-	    Family *ptr;
-
-	    ptr = new Family(Family(fname, lname, phonenum_int, birthday));
+	    Family fa(fname, lname, phonenum_int, birthday);
 	    cout << "Succesfully added new person." << endl;
 
-	    return ptr;
+	    return fa;
 	}
 
-	Friend* addFriend()
+	Friend addFriend()
 	{
 	    string fname, lname, phonenum;
 	    int age;
@@ -120,12 +114,10 @@ class Console
 	    cin >> age;
 	    int phonenum_int = string_to_int(phonenum);
 
-	    Friend *ptr;
-
-	    ptr = new Friend(Friend(fname, lname, phonenum_int, age));
+	    Friend fr(fname, lname, phonenum_int, age);
 	    cout << "Succesfully added new person." << endl;
 
-	    return ptr;
+	    return fr;
 	}
 
 	int rmPerson()
@@ -142,7 +134,8 @@ class Console
 
 int main()
 {
-   vector<Person*> phonebook;
+   vector<Person> phonebook;
+   vector<int> type; //type1: Person, 2: Work, 3: Family, 4: Friend
    string command;
    Console c;
 
@@ -155,14 +148,25 @@ int main()
 	{
 	    int category = c.printAddPerson();
 	    if (category == 1)
+	    {
 		phonebook.push_back(c.addPerson());
+		type.push_back(1);
+	    }
 	    else if (category == 2)
+	    {
 		phonebook.push_back(c.addWork());
+		type.push_back(2);
+	    }
 	    else if (category == 3)
+	    {
 		phonebook.push_back(c.addFamily());
+		type.push_back(3);
+	    }
 	    else if (category == 4)
+	    {
 		phonebook.push_back(c.addFriend());
-
+		type.push_back(4);
+	    }
 	    getline(cin, command);  // to consume '\n' which was at the end of
 				    // phone_number inoput (in c.add*() function) 
 	}
@@ -174,6 +178,7 @@ int main()
 	    else
 	    {
 		phonebook.erase(phonebook.begin()+index-1);
+		type.erase(type.begin()+index-1);
 		cout << "A person is successfully deleted from the Phone Book!" << endl;
 	    }
 	    getline(cin, command);  // to consume '\n' which was at the end of
@@ -181,15 +186,19 @@ int main()
 	}
 	else if (command == "3")
 	{
-	    if (phonebook.size() > 0)
+	    cout << "Phone Book Print" << endl;
+	    int i;
+	    for (i=0; i<phonebook.size(); i++)
 	    {
-		cout << "Phone Book Print" << endl;
-		int i;
-		for (i=0; i<phonebook.size(); i++)
-		{
-		    cout << i+1 << ". ";
-		    phonebook[i]->print();
-		}
+		cout << i+1 << ". ";
+		if (type[i]==1)
+		    phonebook[i].print();
+		else if (type[i]==2)
+		    phonebook[i].print();
+		else if (type[i]==3)
+		    phonebook[i].print();
+		else if (type[i]==4)
+		    phonebook[i].print();
 	    }
 	}
 	else if (command == "exit")
