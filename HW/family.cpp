@@ -10,7 +10,7 @@ using std::cout;
 using std::endl;
 using std::string;
 
-Family::Family(string &myfirstName, string &mylastName, int &myphonenum, string &myBirthday) : Person(myfirstName, mylastName, myphonenum) 
+Family::Family(string &myfirstName, string &mylastName, int &myphoneNumber, string &myBirthday) : Person(myfirstName, mylastName, myphoneNumber) 
 {
     birthday = myBirthday;
 }
@@ -37,20 +37,24 @@ int Family::dates_of_month(int month)
 
 int Family::dDay()
 {
-    int bM = (birthday[2]-'0')*10 + (birthday[3]-'0'); 
-    int bD = (birthday[4]-'0')*10 + (birthday[5]-'0'); 
+    int bM = (birthday[2]-'0')*10 + (birthday[3]-'0');  // MM of YYMMDD
+    int bD = (birthday[4]-'0')*10 + (birthday[5]-'0');	// DD of YYMMDD 
+
     time_t t = time(0);
     struct tm *now = localtime(&t);
-    int cM = (now->tm_mon) + 1;
-    int cD = now->tm_mday;
+    int cM = (now->tm_mon) + 1;  // current month
+    int cD = now->tm_mday;       // current date
+
     int dday = 0;
     int i;
+
     for (i=cM; i<=12; i++)
 	dday = dday + dates_of_month(i);
     for (i=1; i<bM; i++)
 	dday = dday + dates_of_month(i);
     dday = dday - cD + bD;
-    if (dday >= 365)
+
+    if (dday >= 365)          // if bMbD >= cMcD
 	dday = dday - 365;
 
     return dday;

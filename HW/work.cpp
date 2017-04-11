@@ -12,14 +12,17 @@ Work::Work(string &myfirstName, string &mylastName, int &myphoneNumber, string &
 {
     team = myteam;
 }
+
 void Work::setTeam(string myteam)
 {
     team = myteam;
 }
+
 string Work::getTeam()
 {
     return team;
 }
+
 void Work::print()
 {
     cout << getFirstName() << " " << getLastName() << "_";

@@ -2,7 +2,6 @@
 #include <cstdio>
 #include <cstring>
 #include <vector>
-
 #include "person.h"
 #include "work.h"
 #include "friend.h"
@@ -41,8 +40,9 @@ class Console
 	    int i;
 	    int phonenum_int = 0;
 
-	    for (i=0; i<phonenum.size(); i++) {
-		if (phonenum[i] >= '0' && phonenum[i] <= '9')
+	    for (i=0; i<phonenum.size(); i++)
+	    {
+		if (phonenum[i] >= '0' && phonenum[i] <= '9') // if phonenum[i] == '-' do nothing
 		    phonenum_int = phonenum_int * 10 + (phonenum[i] - '0');
 	    }
 
@@ -140,8 +140,6 @@ class Console
 };
 
 
-
-
 int main()
 {
    vector<Person*> phonebook;
@@ -213,7 +211,7 @@ int main()
 	}
 	else if (command == "exit")
 	    break;
-	else
+	else   // when enter key is pressed
 	    c.initialState();
     }
 }

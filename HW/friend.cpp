@@ -12,14 +12,17 @@ Friend::Friend(string &myfirstName, string &mylastName, int &myphoneNumber, int 
 {
     age = myage;
 }
+
 void Friend::setAge(int myage)
 {
     age = myage;
 }
+
 int Friend::getAge()
 {
     return age;
 }
+
 void Friend::print()
 {
     cout << getFirstName() << " " << getLastName() << "_";

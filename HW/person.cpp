@@ -15,30 +15,37 @@ Person::Person(string &myfirstName, string &mylastName, int &myphoneNumber)
     lastName = mylastName;
     phoneNumber = myphoneNumber;
 }
+
 void Person::setFirstName(string &myfirstName)
 {
     firstName = myfirstName;
 }
+
 string Person::getFirstName()
 {
     return firstName;
 }
+
 void Person::setLastName(string &mylastName)
 {
     lastName = mylastName;
 }
+
 string Person::getLastName()
 {
     return lastName;
 }	
+
 void Person::setPhoneNumber(int &myphoneNumber)
 {
     phoneNumber = myphoneNumber;
 }
+
 int Person::getPhoneNumber()
 {
     return phoneNumber;
 }
+
 void Person::int_to_string(int &phoneNumber_int)
 {
     int front;
@@ -48,6 +55,8 @@ void Person::int_to_string(int &phoneNumber_int)
     front =  phoneNumber_int / 100000000;
     mid   = (phoneNumber_int % 100000000) / 10000;
     back  =  phoneNumber_int % 10000;
+
+    printf("0%d-%4d-%4d", front, mid, back);
 }
 
 void Person::print()
