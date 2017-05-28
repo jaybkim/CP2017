@@ -518,6 +518,7 @@ int main(int argc, char **argv)
 		{
 		    attr = line.substr(0, pos);
 		    v[field_name.at(i)] = attr;
+                    i++;
 		    line.erase(0, pos + delimiter.length());
 		}
 		v[field_name.back()] = line; // add last word of line
@@ -588,6 +589,7 @@ int main(int argc, char **argv)
 		{
 		    attr = line.substr(0, pos);
 		    v[field_name.at(i)] = attr;
+                    i++;
 		    line.erase(0, pos + delimiter.length());
 		}
 		v[field_name.back()] = line; // add last word of line
