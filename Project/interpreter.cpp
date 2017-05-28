@@ -356,15 +356,20 @@ int main(int argc, char **argv)
 	    }
 	    else
 	    {
+		//bool change_scope = false;
 		for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
 		{
 		    child = parent_of_selected_scope -> get_child(i);
 		    if (child -> get_selected())
 		    {
 			select(svg_tag_name, child);
+			parent_of_selected_scope = child;
+			break;
+			//change_scope = true;
 		    }
 		}
-		parent_of_selected_scope = child;
+		/*if (change_scope == false)
+		    parent_of_selected_scope = child;*/
 	    }
 	}
 	else if (strcmp(command.c_str(), "remove")==0)
@@ -436,6 +441,7 @@ int main(int argc, char **argv)
 		    attr = line.substr(0, pos);
 	//	    cout << attr << endl;
 		    v[field_name.at(i)] = attr;
+		    i++;
 		    line.erase(0, pos + delimiter.length());
 		}
 	//	cout << line << endl;
@@ -706,26 +712,29 @@ int main(int argc, char **argv)
 		if (child->get_selected())
 		{
 		    binded_data = child -> get_binded_data();
+		    //cout << datum_field_name << endl;
+		    /*for (auto p : binded_data)
+			cout << p.first << ":" << p.second << endl;*/
 		    string value_str = binded_data.find(datum_field_name) -> second;
-		    cout << "------------------------" << endl;
+		    //cout << "------------------------" << endl;
 		    attr = child -> get_attr();
 		    //attr.erase(attr.find(datum_field_name));
 		    //child -> add_accessible_attr(svg_attr_name);
 		    if (arg.size()==2) // no mul and add
 		    {
-			cout << "2222222222222" << endl;
+		//	cout << "2222222222222" << endl;
 			attr[svg_attr_name] = value_str;
 		    }
 		    else if (arg.size()==3) // only mul
 		    {
-		    	cout << "33333333333333" << endl;
+	//	    	cout << "33333333333333" << endl;
 			mul = atof(arg.at(2).c_str());
 			value = atof(value_str.c_str());
 			attr[svg_attr_name] = to_string(value * mul);
 		    }
 		    else if (arg.size()==4) // both mul and add
 		    {
-			cout << "44444444444444" << endl;
+//			cout << "44444444444444" << endl;
 			mul = atof(arg.at(2).c_str());
 			add = atof(arg.at(3).c_str());
 			value = atof(value_str.c_str());
