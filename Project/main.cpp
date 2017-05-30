@@ -103,7 +103,7 @@ void append(string svg_tag_name, svg* parent)
     int child_num = parent -> get_children_num();
     parent -> set_children_num(child_num+1);
 }
-    
+
 void select(string svg_tag_name, svg* selected_svg)
 {
     selected_svg -> set_selected(false);
@@ -111,11 +111,11 @@ void select(string svg_tag_name, svg* selected_svg)
     int i;
     for (i=0; i<selected_svg -> get_children_num(); i++)
     {
-	child_svg = selected_svg -> get_child(i);
-	if (strcmp((child_svg -> get_svg_tag_name()).c_str(), svg_tag_name.c_str())==0)
-	{
-	    child_svg -> set_selected(true);
-	}
+        child_svg = selected_svg -> get_child(i);
+        if (strcmp((child_svg -> get_svg_tag_name()).c_str(), svg_tag_name.c_str())==0)
+        {
+            child_svg -> set_selected(true);
+        }
     }
 }
 
@@ -126,33 +126,31 @@ void remove(svg* parent_of_selected_scope)
     int children_num = parent_of_selected_scope -> get_children_num();
     for (i=children_num-1; i>=0; i--)
     {
-	child_svg = parent_of_selected_scope -> get_child(i);
-	if (child_svg -> get_selected())
-	{
-	    parent_of_selected_scope -> erase(i);
-	    parent_of_selected_scope -> set_children_num(--children_num);
-	}
+        child_svg = parent_of_selected_scope -> get_child(i);
+        if (child_svg -> get_selected())
+        {
+            parent_of_selected_scope -> erase(i);
+            parent_of_selected_scope -> set_children_num(--children_num);
+        }
     }
 }
 
-void print(ofstream &fout, svg* parent_svg, int index)
+void print(ofstream &fout, svg* parent_svg)
 {
     fout << "<" << parent_svg -> get_svg_tag_name();
     map<string, string> attr = parent_svg -> get_attr();
 
     for (auto iter= attr.begin(); iter!=attr.end(); iter++)
     {
-	fout << " " << iter->first << "=" << '"' << iter->second << '"'; 
+        fout << " " << iter->first << "=" << '"' << iter->second << '"';
     }
     fout << ">";
 
     int i;
     for (i=0; i<parent_svg -> get_children_num(); i++)
     {
-	svg* child_svg = parent_svg -> get_child(i);
-	print(fout, child_svg, index);
-	if (child_svg -> get_selected())
-	    index++;
+        svg* child_svg = parent_svg -> get_child(i);
+        print(fout, child_svg);
     }
 
     fout << "</" << parent_svg -> get_svg_tag_name() << ">";
@@ -167,7 +165,6 @@ int main(int argc, char **argv)
     root -> set_children_num(0);
     root -> clear_attr();
     svg* parent_of_selected_scope = NULL;
-    string recipe;
 
     svg* child = new svg();
     child -> set_children_num(0);
@@ -180,84 +177,84 @@ int main(int argc, char **argv)
 
     while (true)
     {
-	string command;
-	cin >> command;
-	string svg_attr_name;
-	int csv_index;
+        string command;
+        cin >> command;
+        string svg_attr_name;
+        int csv_index;
 
-	ifstream fin;
-	
-	if (strcmp(command.c_str(), "append")==0)
-	{
-	    cin >> svg_tag_name;
-	    if (parent_of_selected_scope == NULL)
-	    {
-		child = root;
-		append(svg_tag_name, child);
-		parent_of_selected_scope = child;
-	    }
-	    else
-	    {
-		for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
-		{
-		    child = parent_of_selected_scope -> get_child(i);
-		    if (child -> get_selected())
-		    {
-			append(svg_tag_name, child);
-			parent_of_selected_scope = child;
-		    }
-		}
-	    }
-	}
-	else if (strcmp(command.c_str(), "select")==0 || strcmp(command.c_str(), "selectAll")==0)
-	{
-	    cin >> svg_tag_name;
-	    if (parent_of_selected_scope == NULL) // root-selection
-	    {
-		select(svg_tag_name, root);
-		parent_of_selected_scope = root;
-	    }
-	    else
-	    {
-		for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
-		{
-		    child = parent_of_selected_scope -> get_child(i);
-		    if (child -> get_selected())
-		    {
-			select(svg_tag_name, child);
-			parent_of_selected_scope = child;
-			break;
-		    }
-		}
-	    }
-	}
-	else if (strcmp(command.c_str(), "remove")==0)
-	{
-	    remove(parent_of_selected_scope);
-	    parent_of_selected_scope = parent_of_selected_scope -> get_parent();
-	}
-	else if (strcmp(command.c_str(), "end")==0)
-	{
-	    if (parent_of_selected_scope == NULL)
-		return 0;
-	    else
-	    {
-		for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
-		{
-		    child = parent_of_selected_scope -> get_child(i);
-		    if (child -> get_selected())
-		    {
-			child -> set_selected(false);
-		    }
-		}
-		parent_of_selected_scope -> set_selected(true);
-		parent_of_selected_scope = parent_of_selected_scope -> get_parent();
-	    }
-	}
-	else if (strcmp(command.c_str(), "enter")==0)
-	{
-	    cin >> csv_index;
-	    fin.open(argv[csv_index]);
+        ifstream fin;
+
+        if (strcmp(command.c_str(), "append")==0)
+        {
+            cin >> svg_tag_name;
+            if (parent_of_selected_scope == NULL)
+            {
+                child = root;
+                append(svg_tag_name, child);
+                parent_of_selected_scope = child;
+            }
+            else
+            {
+                for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
+                {
+                    child = parent_of_selected_scope -> get_child(i);
+                    if (child -> get_selected())
+                    {
+                        append(svg_tag_name, child);
+                        parent_of_selected_scope = child;
+                    }
+                }
+            }
+        }
+        else if (strcmp(command.c_str(), "select")==0 || strcmp(command.c_str(), "selectAll")==0)
+        {
+            cin >> svg_tag_name;
+            if (parent_of_selected_scope == NULL) // root-selection
+            {
+                select(svg_tag_name, root);
+                parent_of_selected_scope = root;
+            }
+            else
+            {
+                for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
+                {
+                    child = parent_of_selected_scope -> get_child(i);
+                    if (child -> get_selected())
+                    {
+                        select(svg_tag_name, child);
+                        parent_of_selected_scope = child;
+                        break;
+                    }
+                }
+            }
+        }
+        else if (strcmp(command.c_str(), "remove")==0)
+        {
+            remove(parent_of_selected_scope);
+            parent_of_selected_scope = parent_of_selected_scope -> get_parent();
+        }
+        else if (strcmp(command.c_str(), "end")==0)
+        {
+            if (parent_of_selected_scope == NULL)
+                return 0;
+            else
+            {
+                for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
+                {
+                    child = parent_of_selected_scope -> get_child(i);
+                    if (child -> get_selected())
+                    {
+                        child -> set_selected(false);
+                    }
+                }
+                parent_of_selected_scope -> set_selected(true);
+                parent_of_selected_scope = parent_of_selected_scope -> get_parent();
+            }
+        }
+        else if (strcmp(command.c_str(), "enter")==0)
+        {
+            cin >> csv_index;
+            fin.open(argv[csv_index]);
             csv enter_csv;
             enter_csv.read_field_name_type(fin);
             field_name = enter_csv.get_field_name();
@@ -265,86 +262,86 @@ int main(int argc, char **argv)
             enter_csv.read_data(fin);
             map<string, map<string, string>> m = enter_csv.get_data();
 
-	    for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
-	    {
-		child = parent_of_selected_scope -> get_child(i);
-		if (child -> get_selected())
-		{
-		    child -> set_selected(false);
-		    string child_id = child -> get_unique_id();
-		    for (auto p : m)
-		    {
-			if (strcmp(child_id.c_str(), p.first.c_str()) == 0)
-			{
-			    child -> set_binded_data(p.second);
-			    m.erase(p.first);
-			}
-		    }
-		    break;
-		}
-	    }
-	    if (m.size() > 0)
-	    {
-		int index = 0;
-		while (m.size() > 0)
-		{
-		    auto p = m.begin();
-		    svg* child_new = new svg();
-		    child_new -> clear_attr();
-		    child_new -> set_svg_tag_name(svg_tag_name);
-		    child_new -> set_selected(true);
-		    child_new -> set_parent(child);
-		    std::advance(p, index);
-		    string key = p->first;
-		    child_new -> set_unique_id(key);
-		    child_new -> set_binded_data(p->second);
-		    child_new -> set_children_num(0);
-		    child -> add_child(child_new);
-		    int children_num_before = child -> get_children_num();
-		    child -> set_children_num(children_num_before + 1);
-		    m.erase(key);
-		}
-	    }
-	    fin.close();
-	}
-	else if (strcmp(command.c_str(), "update")==0)
-	{
-	    cin >> csv_index;
+            for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
+            {
+                child = parent_of_selected_scope -> get_child(i);
+                if (child -> get_selected())
+                {
+                    child -> set_selected(false);
+                    string child_id = child -> get_unique_id();
+                    for (auto p : m)
+                    {
+                        if (strcmp(child_id.c_str(), p.first.c_str()) == 0)
+                        {
+                            child -> set_binded_data(p.second);
+                            m.erase(p.first);
+                        }
+                    }
+                    break;
+                }
+            }
+            if (m.size() > 0)
+            {
+                int index = 0;
+                while (m.size() > 0)
+                {
+                    auto p = m.begin();
+                    svg* child_new = new svg();
+                    child_new -> clear_attr();
+                    child_new -> set_svg_tag_name(svg_tag_name);
+                    child_new -> set_selected(true);
+                    child_new -> set_parent(child);
+                    std::advance(p, index);
+                    string key = p->first;
+                    child_new -> set_unique_id(key);
+                    child_new -> set_binded_data(p->second);
+                    child_new -> set_children_num(0);
+                    child -> add_child(child_new);
+                    int children_num_before = child -> get_children_num();
+                    child -> set_children_num(children_num_before + 1);
+                    m.erase(key);
+                }
+            }
+            fin.close();
+        }
+        else if (strcmp(command.c_str(), "update")==0)
+        {
+            cin >> csv_index;
 
-	    fin.open(argv[csv_index]);
+            fin.open(argv[csv_index]);
             csv update_csv;
             update_csv.read_field_name_type(fin);
             field_name = update_csv.get_field_name();
             field_type = update_csv.get_field_type();
             update_csv.read_data(fin);
             map<string, map<string, string>> m = update_csv.get_data();
-	    for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
-	    {
-		child = parent_of_selected_scope -> get_child(i);
-		if (child -> get_selected())
-		{
-		    string child_id = child -> get_unique_id();
-		    bool exist = false;
-		    for (auto p : m)
-		    {
-			if (strcmp(child_id.c_str(), p.first.c_str()) == 0)
-			{
-			    exist = true;
-			    child -> set_binded_data(p.second);
-			    m.erase(p.first);
-			}
-		    }
-		    if (exist == false)
-			child -> set_selected(false);
-		}
-	    }
-	    fin.close();
-	}
-	else if (strcmp(command.c_str(), "exit")==0)
-	{
-	    cin >> csv_index;
+            for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
+            {
+                child = parent_of_selected_scope -> get_child(i);
+                if (child -> get_selected())
+                {
+                    string child_id = child -> get_unique_id();
+                    bool exist = false;
+                    for (auto p : m)
+                    {
+                        if (strcmp(child_id.c_str(), p.first.c_str()) == 0)
+                        {
+                            exist = true;
+                            child -> set_binded_data(p.second);
+                            m.erase(p.first);
+                        }
+                    }
+                    if (exist == false)
+                        child -> set_selected(false);
+                }
+            }
+            fin.close();
+        }
+        else if (strcmp(command.c_str(), "exit")==0)
+        {
+            cin >> csv_index;
 
-	    fin.open(argv[csv_index]);
+            fin.open(argv[csv_index]);
             csv exit_csv;
             exit_csv.read_field_name_type(fin);
             field_name = exit_csv.get_field_name();
@@ -352,133 +349,133 @@ int main(int argc, char **argv)
             exit_csv.read_data(fin);
             map<string, map<string, string>> m = exit_csv.get_data();
 
-	    for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
-	    {
-		child = parent_of_selected_scope -> get_child(i);
-		if (child -> get_selected())
-		{
-		    string child_id = child -> get_unique_id();
-		    bool exist = false;
-		    for (auto p : m)
-		    {
-			if (strcmp(child_id.c_str(), p.first.c_str()) == 0)
-			{
-			    exist = true;
-			    child -> set_binded_data(p.second);
-			    m.erase(p.first);
-			}
-		    }
-		    if (exist == true)
-			child -> set_selected(false);
-		}
-	    }
-	    fin.close();
-	}
-	else if (strcmp(command.c_str(), "cattr")==0)
-	{
-	    string svg_attr_value;
-	    cin >> svg_attr_name;
-	    cin >> svg_attr_value;
-	    for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
-	    {
-		child = parent_of_selected_scope -> get_child(i);
-		if (child -> get_selected())
-		{
-		    map<string, string> m = child -> get_attr();
-		    if (m.size()!=0)
-		    {
-			map<string, string>::iterator it = m.find(svg_tag_name);
-			if (it != m.end())
-			{
-			    m.erase(it->first);
-			}
-		    }
-		    m[svg_attr_name] = svg_attr_value;
-		    child -> set_attr(m);
-		}
-	    }
-	}
-	else if (strcmp(command.c_str(), "tattr")==0)
-	{
-	    double x_multiplier, y_multiplier;
-	    cin >> x_multiplier >> y_multiplier;
-	    map<string, string> attr;
-	    int cnt = 0;
-	    for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
-	    {
-		child = parent_of_selected_scope -> get_child(i);
-		attr = child -> get_attr();
-		if (child -> get_selected())
-		{
-		    string transform = std::string("translate(") + std::to_string(x_multiplier * cnt) + "," + std::to_string(y_multiplier * cnt) + ")";
-		    cnt++;
-		    attr["transform"] = transform;
-		    child -> set_attr(attr);
-		}
-	    }
-	}
-	    
-	else if (strcmp(command.c_str(), "dattr")==0)
-	{
-	    double mul;
-	    double add;
-	    string datum_field_name;
+            for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
+            {
+                child = parent_of_selected_scope -> get_child(i);
+                if (child -> get_selected())
+                {
+                    string child_id = child -> get_unique_id();
+                    bool exist = false;
+                    for (auto p : m)
+                    {
+                        if (strcmp(child_id.c_str(), p.first.c_str()) == 0)
+                        {
+                            exist = true;
+                            child -> set_binded_data(p.second);
+                            m.erase(p.first);
+                        }
+                    }
+                    if (exist == true)
+                        child -> set_selected(false);
+                }
+            }
+            fin.close();
+        }
+        else if (strcmp(command.c_str(), "cattr")==0)
+        {
+            string svg_attr_value;
+            cin >> svg_attr_name;
+            cin >> svg_attr_value;
+            for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
+            {
+                child = parent_of_selected_scope -> get_child(i);
+                if (child -> get_selected())
+                {
+                    map<string, string> m = child -> get_attr();
+                    if (m.size()!=0)
+                    {
+                        map<string, string>::iterator it = m.find(svg_tag_name);
+                        if (it != m.end())
+                        {
+                            m.erase(it->first);
+                        }
+                    }
+                    m[svg_attr_name] = svg_attr_value;
+                    child -> set_attr(m);
+                }
+            }
+        }
+        else if (strcmp(command.c_str(), "tattr")==0)
+        {
+            double x_multiplier, y_multiplier;
+            cin >> x_multiplier >> y_multiplier;
+            map<string, string> attr;
+            int cnt = 0;
+            for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
+            {
+                child = parent_of_selected_scope -> get_child(i);
+                attr = child -> get_attr();
+                if (child -> get_selected())
+                {
+                    string transform = std::string("translate(") + std::to_string(x_multiplier * cnt) + "," + std::to_string(y_multiplier * cnt) + ")";
+                    cnt++;
+                    attr["transform"] = transform;
+                    child -> set_attr(attr);
+                }
+            }
+        }
 
-	    string dattr_line;
-	    getline(cin, dattr_line);
-	    stringstream ss(dattr_line);
-	    string tmp;
-	    vector<string> arg;
-	    while (ss >> tmp)
-	    {
-		arg.push_back(tmp);
+        else if (strcmp(command.c_str(), "dattr")==0)
+        {
+            double mul;
+            double add;
+            string datum_field_name;
 
-		if (ss.peek()==' ')
-		    ss.ignore();
-	    }
+            string dattr_line;
+            getline(cin, dattr_line);
+            stringstream ss(dattr_line);
+            string tmp;
+            vector<string> arg;
+            while (ss >> tmp)
+            {
+                arg.push_back(tmp);
 
-	    svg_attr_name = arg.at(0);
-	    datum_field_name = arg.at(1);
-	    map<string, string> binded_data;
-	    map<string, string> attr;
-	    double value;
-	    for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
-	    {
-		child = parent_of_selected_scope -> get_child(i);
-		if (child->get_selected())
-		{
-		    binded_data = child -> get_binded_data();
-		    string value_str = binded_data.find(datum_field_name) -> second;
-		    attr = child -> get_attr();
-		    if (arg.size()==2) // no mul and add
-		    {
-			attr[svg_attr_name] = value_str;
-		    }
-		    else if (arg.size()==3) // only mul
-		    {
-			mul = atof(arg.at(2).c_str());
-			value = atof(value_str.c_str());
-			attr[svg_attr_name] = to_string(value * mul);
-		    }
-		    else if (arg.size()==4) // both mul and add
-		    {
-			mul = atof(arg.at(2).c_str());
-			add = atof(arg.at(3).c_str());
-			value = atof(value_str.c_str());
-			attr[svg_attr_name] = to_string(value * mul + add);
-		    }
-		    child -> set_attr(attr);
-		}
-	    }
-	}
-	else if (strcmp(command.c_str(), "print")==0)
-	{
-	    ofstream fout;
-	    string output_name;
-	    cin >> output_name;
-	    fout.open(output_name);
-	    print(fout, root, 0);
-	    fout.close();
-	}
+                if (ss.peek()==' ')
+                    ss.ignore();
+            }
+
+            svg_attr_name = arg.at(0);
+            datum_field_name = arg.at(1);
+            map<string, string> binded_data;
+            map<string, string> attr;
+            double value;
+            for (i=0; i<parent_of_selected_scope -> get_children_num(); i++)
+            {
+                child = parent_of_selected_scope -> get_child(i);
+                if (child->get_selected())
+                {
+                    binded_data = child -> get_binded_data();
+                    string value_str = binded_data.find(datum_field_name) -> second;
+                    attr = child -> get_attr();
+                    if (arg.size()==2) // no mul and add
+                    {
+                        attr[svg_attr_name] = value_str;
+                    }
+                    else if (arg.size()==3) // only mul
+                    {
+                        mul = atof(arg.at(2).c_str());
+                        value = atof(value_str.c_str());
+                        attr[svg_attr_name] = to_string(value * mul);
+                    }
+                    else if (arg.size()==4) // both mul and add
+                    {
+                        mul = atof(arg.at(2).c_str());
+                        add = atof(arg.at(3).c_str());
+                        value = atof(value_str.c_str());
+                        attr[svg_attr_name] = to_string(value * mul + add);
+                    }
+                    child -> set_attr(attr);
+                }
+            }
+        }
+        else if (strcmp(command.c_str(), "print")==0)
+        {
+            ofstream fout;
+            string output_name;
+            cin >> output_name;
+            fout.open(output_name);
+            print(fout, root);
+            fout.close();
+        }
     }
 }
