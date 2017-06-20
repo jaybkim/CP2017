@@ -133,21 +133,15 @@ public class ChessBoard {
         };
         SwingUtilities.invokeLater(r);
 	}
+        
+        public void printBoardStatus() {
+            for (int i=0; i<8; i++) {
+                for (int j=0; j<8; j++)
+                    System.out.print(chessBoardStatus[j][i].type + " ");
+                System.out.println();
+                }
+        }
 		
-	public void printBoardStatus(){
-		for(int i=0;i<8;i++){
-			for(int j=0;j<8;j++) System.out.print(chessBoardStatus[j][i].type+" ");
-                        System.out.println();
-		}
-	}
-
-	public void printBoardColor(){
-		for(int i=0;i<8;i++){
-			for(int j=0;j<8;j++) System.out.print(chessBoardStatus[j][i].color+" ");
-                        System.out.println();
-		}
-	}
-
 	//================================Utilize these functions========================================//	
 	
 	class Piece{
@@ -227,30 +221,16 @@ public class ChessBoard {
         private PlayerColor turn;
         private PlayerColor counterpart;
         private boolean selected; // if user choosed a icon to move, selected = true; not yet, selected = false;
-        //private arraylist<boolean>[][] possiblemove = new arraylist[8][8];
-        //private arraylist<boolean>[][] possibleattack = new arraylist[8][8];
         private boolean[][] PossibleMove = new boolean[8][8];
         private boolean[][] PossibleAttack = new boolean[8][8];
 
-/*        void clearpossiblemove() {
-            for (int i=0; i<8; i++)
-                for (int j=0; j<8; j++) possiblemove[j][i].add(false);
-        }*/
-
         void clearPossibleAttack() {
             for (int i=0; i<8; i++)
-                //for (int j=0; j<8; j++) possibleattack[j][i].add(false);
                 for (int j=0; j<8; j++) PossibleAttack[j][i] = false;
         }
 
         void NextAttackForPawn(Piece status, int x, int y) {
             if (status.color.equals(PlayerColor.black)) {
-               /* if (x == 1 && geticon(x+2, y).color.equals(playercolor.none) && geticon(x+1, y).equals(playercolor.none)) { // first move and there should be nothing in front of it to move two steps
-                    possibleattack[y][x+2] = true;
-                }
-                if ((x+1)<8)
-                    if (geticon(x+1, y).color.equals(playercolor.none)) {
-                        possibleattack[y][x+1] = true;*/
                 if ((y-1)>=0 && (x+1)<8) {
                     if (getIcon(x+1, y-1).color.equals(PlayerColor.white))
                         PossibleAttack[y-1][x+1] = true;
@@ -261,11 +241,6 @@ public class ChessBoard {
                 }
             }
             else { //white
-               /* if (x == 6 && geticon(x-2, y).color.equals(playercolor.none)) // first move
-                    possibleattack[y][x-2];
-                if ((x-1)>=0)
-                    if (geticon(x-1, y).color.equals(playercolor.none))
-                        possibleattack[y][x-1];*/
                 if ((y-1)>=0 && (x-1)>=0) {
                     if (getIcon(x-1, y-1).color.equals(PlayerColor.black))
                         PossibleAttack[y-1][x-1] = true;
@@ -452,7 +427,6 @@ public class ChessBoard {
         void ColorWay(Piece status, int x, int y) {
             clearPossibleAttack();
             NextMove(status, x, y);
-            System.out.println("-----------------------" + status.type);
             for (int i=0; i<8; i++)
                 for (int j=0; j<8; j++)
                     if (PossibleMove[j][i] == true) markPosition(i, j);
@@ -470,45 +444,45 @@ public class ChessBoard {
 		public void actionPerformed(ActionEvent e) {	// only modify here
 			// (x, y) is where the click event occured
                     ChessBoard.this.printBoardStatus();
-                    ChessBoard.this.printBoardColor();
-                    Piece status = getIcon(x, y); 
-                    if (selected == false) {
-                        if (status.color.equals(turn)) {
-                            selected = true;
-                            selX = x;
-                            selY = y;
-                            ColorWay(status, x, y);
+                    //ChessBoard.this.printBoardColor();
+                    if (end == false) {
+                        Piece status = getIcon(x, y); 
+                        if (selected == false) {
+                            if (status.color.equals(turn)) {
+                                selected = true;
+                                selX = x;
+                                selY = y;
+                                ColorWay(status, x, y);
+                            }
                         }
-                    }
 
-                    else { // if user choosed one to move(the way where can move is marked on the board)
-                        if (chessBoardSquares[y][x].getBackground().equals(Color.pink)) {
-                            //system.out.println("selected: ("+selx+","+sely+")");
-                            //system.out.println("clicked: ("+x+","+y+")");
-                            ChessBoard.this.move(selX, selY, x, y);
-                            //system.out.println("seticon: ("+x+","+y+","+status.type+")");
-                            ChessBoard.this.setIcon(x, y, status);
-                            ChessBoard.this.setIcon(selX, selY, getIcon(selX,selY));
-                            selected = false;
-                            PlayerColor tmp;
-                            tmp = counterpart;
-                            counterpart = turn;
-                            turn = tmp;
-                            String s = new String(turn + "'" + "s turn");
-                            if (isCheckMate())
-                            	s = s + "| CheckMate";
-                            else if (isCheck())
-                            	s = s + "| Check";
-                            setStatus(s);
-                            //System.out.println("next turn: " + turn);
-                        }
-                        for(int i=0;i<8;i++){
-                                for(int j=0;j<8;j++) unmarkPosition(i, j);
-                        }
-                        if (chessBoardStatus[y][x].color.equals(turn)) {
-                            selX = x;
-                            selY = y;
-                            ColorWay(status, x, y);
+                        else { // if user choosed one to move(the way where can move is marked on the board)
+                            if (chessBoardSquares[y][x].getBackground().equals(Color.pink)) {
+                                if (getIcon(x, y).type.equals(PieceType.king))
+                                    end = true;
+                                ChessBoard.this.move(selX, selY, x, y);
+                                ChessBoard.this.setIcon(x, y, status);
+                                ChessBoard.this.setIcon(selX, selY, getIcon(selX,selY));
+                                selected = false;
+                                PlayerColor tmp;
+                                tmp = counterpart;
+                                counterpart = turn;
+                                turn = tmp;
+                                String s = new String(turn + "'" + "s turn");
+                                if (isCheckMate())
+                                    s = s + "| CheckMate";
+                                else if (isCheck())
+                                    s = s + "| Check";
+                                setStatus(s);
+                            }
+                            for(int i=0;i<8;i++){
+                                    for(int j=0;j<8;j++) unmarkPosition(i, j);
+                            }
+                            if (chessBoardStatus[y][x].color.equals(turn)) {
+                                selX = x;
+                                selY = y;
+                                ColorWay(status, x, y);
+                            }
                         }
                     }
 		}
@@ -521,33 +495,12 @@ public class ChessBoard {
             getIcon(startX, startY).color = PlayerColor.none;
         }
         
-        /*boolean isCheck(Piece status, int x, int y) { // if you don't escape the king will be captured
-            ClearPossibleAttack();
-            NextMove(getIcon(x, y), x, y);
-                for(int i=0;i<8;i++) 
-                    for(int j=0;j<8;j++) {
-                        if (PossibleMove[j][i].equals(true))
-                            move(x, y, i, j);
-                            isCheck(getIcon
-           ClearPossibleAttack();
-            NextAttack(status, x, y);
-                for(int i=0;i<8;i++){
-                    for(int j=0;j<8;j++) 
-                        if (PossibleAttack[j][i] == true && getIcon(i, j).type.equals(PieceType.king) && getIcon(i, j).color.equals(counterpart)) {
-                            check = true;
-                            return true;
-                        }
-                }
-            check = false;
-            return false;
-        } */
-        
         boolean canCaptureKing(int x, int y, PlayerColor turn) {
             clearPossibleAttack();
             NextMove(getIcon(x, y), x, y);
             for(int i=0;i<8;i++) {
                 for(int j=0;j<8;j++) {
-                    if (PossibleMove[j][i] == true && getIcon(i, j).type.equals(PieceType.king) /*&& getIcon(i, j).color.equals(turn)*/) {
+                    if (PossibleMove[j][i] == true && getIcon(i, j).type.equals(PieceType.king) && getIcon(i, j).color.equals(turn)) {
                     	System.out.println("!!!!!!!!!!!!!!!1" + getIcon(i, j).color);
                         return true;
                     }
@@ -582,6 +535,14 @@ public class ChessBoard {
                     	PieceType tmpType = getIcon(i, j).type;
                         move(x, y, i, j);
                         if (isCheck() == false) {
+                            for(int k=0;k<8;k++) {
+                                for(int l=0;l<8;l++)
+                                    System.out.print(PossibleMove[l][k]);
+                                System.out.println();
+                            }
+                            System.out.print("x: " + x + " y: " + y + " i: " + i + " j :" + j);
+                            System.out.println("-------------------------------");
+                            printBoardStatus();
                             undo(x, y, i, j, tmpColor, tmpType);
                             return false;
                         }
@@ -606,10 +567,14 @@ public class ChessBoard {
                 for(int i=0;i<8;i++) {
                     for(int j=0;j<8;j++) {
                         if (getIcon(i, j).color.equals(turn))  // move all my PieceTypes
+                        {
+                            System.out.println(turn);
                             if (StillChecked(i, j) == false)
                                 return false;
+                        }
                     }
                 }
+                end = true;
                 return true;
             }
         }
