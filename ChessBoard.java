@@ -577,24 +577,26 @@ public class ChessBoard {
             for(int i=0;i<8;i++) {
                 for(int j=0;j<8;j++) {
                     if (PossibleMove[j][i] == true) {
-                        Piece tmp = getIcon(i, j);
+                        //Piece tmp = getIcon(i, j);
+                    	PlayerColor tmpColor = getIcon(i, j).color;
+                    	PieceType tmpType = getIcon(i, j).type;
                         move(x, y, i, j);
                         if (isCheck() == false) {
-                            undo(x, y, i, j, tmp);
+                            undo(x, y, i, j, tmpColor, tmpType);
                             return false;
                         }
-                        undo(x, y, i, j, tmp);
+                        undo(x, y, i, j, tmpColor, tmpType);
                     }
                 }
             }
             return true;
         }
         
-        void undo(int x, int y, int i, int j, Piece tmp) { // getICon(i, j) was overwritten by move(x, y, i, j)
+        void undo(int x, int y, int i, int j, PlayerColor tmpColor, PieceType tmpType) { // getICon(i, j) was overwritten by move(x, y, i, j)
             getIcon(x, y).type = getIcon(i, j).type;
             getIcon(x, y).color = getIcon(i, j).color;
-            getIcon(i, j).type = tmp.type;
-            getIcon(i, j).color = tmp.color;
+            getIcon(i, j).type = tmpType;
+            getIcon(i, j).color = tmpColor;
         }
             
         boolean isCheckMate() {
