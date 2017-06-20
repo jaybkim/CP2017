@@ -3,6 +3,7 @@ package chess;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+
 import javax.swing.*;
 import javax.swing.border.*;
 //======================================================Don't modify below===============================================================//
@@ -139,8 +140,15 @@ public class ChessBoard {
                         System.out.println();
 		}
 	}
-	
-			//================================Utilize these functions========================================//	
+
+	public void printBoardColor(){
+		for(int i=0;i<8;i++){
+			for(int j=0;j<8;j++) System.out.print(chessBoardStatus[j][i].color+" ");
+                        System.out.println();
+		}
+	}
+
+	//================================Utilize these functions========================================//	
 	
 	class Piece{
 		PlayerColor color;
@@ -159,7 +167,6 @@ public class ChessBoard {
 	public void setIcon(int x, int y, Piece piece){
 		chessBoardSquares[y][x].setIcon(getImageIcon(piece));
 		chessBoardStatus[y][x] = piece;
-                System.out.println("setIcon: "+x+","+y+","+piece.type);
 	}
 	
 	public Piece getIcon(int x, int y){
@@ -219,7 +226,237 @@ public class ChessBoard {
 	private boolean check, checkmate, end;
         private PlayerColor turn;
         private PlayerColor counterpart;
-        private boolean selected; // if user choosed a Icon to move, selected = true; not yet, selected = false;
+        private boolean selected; // if user choosed a icon to move, selected = true; not yet, selected = false;
+        //private arraylist<boolean>[][] possiblemove = new arraylist[8][8];
+        //private arraylist<boolean>[][] possibleattack = new arraylist[8][8];
+        private boolean[][] PossibleMove = new boolean[8][8];
+        private boolean[][] PossibleAttack = new boolean[8][8];
+
+/*        void clearpossiblemove() {
+            for (int i=0; i<8; i++)
+                for (int j=0; j<8; j++) possiblemove[j][i].add(false);
+        }*/
+
+        void clearPossibleAttack() {
+            for (int i=0; i<8; i++)
+                //for (int j=0; j<8; j++) possibleattack[j][i].add(false);
+                for (int j=0; j<8; j++) PossibleAttack[j][i] = false;
+        }
+
+        void NextAttackForPawn(Piece status, int x, int y) {
+            if (status.color.equals(PlayerColor.black)) {
+               /* if (x == 1 && geticon(x+2, y).color.equals(playercolor.none) && geticon(x+1, y).equals(playercolor.none)) { // first move and there should be nothing in front of it to move two steps
+                    possibleattack[y][x+2] = true;
+                }
+                if ((x+1)<8)
+                    if (geticon(x+1, y).color.equals(playercolor.none)) {
+                        possibleattack[y][x+1] = true;*/
+                if ((y-1)>=0 && (x+1)<8) {
+                    if (getIcon(x+1, y-1).color.equals(PlayerColor.white))
+                        PossibleAttack[y-1][x+1] = true;
+                }
+                if ((x+1)<8 && (y+1)<8) {
+                    if (getIcon(x+1, y+1).color.equals(PlayerColor.white))
+                        PossibleAttack[y+1][x+1] = true;
+                }
+            }
+            else { //white
+               /* if (x == 6 && geticon(x-2, y).color.equals(playercolor.none)) // first move
+                    possibleattack[y][x-2];
+                if ((x-1)>=0)
+                    if (geticon(x-1, y).color.equals(playercolor.none))
+                        possibleattack[y][x-1];*/
+                if ((y-1)>=0 && (x-1)>=0) {
+                    if (getIcon(x-1, y-1).color.equals(PlayerColor.black))
+                        PossibleAttack[y-1][x-1] = true;
+                }
+                if ((y+1)<8 && (x-1)>=0) {
+                    if (getIcon(x-1, y+1).color.equals(PlayerColor.black))
+                        PossibleAttack[y+1][x-1] = true;
+                }
+            }
+        }
+
+        void NextAttackForRook(Piece status, int x, int y) {
+            for (int i=x-1; i>=0; i--) {  // color the left positions where rook can move
+                if (getIcon(i, y).color.equals(status.color))
+                    break;
+                else if (getIcon(i,y).color.equals(PlayerColor.none)) { // empty place 
+                    PossibleAttack[y][i] = true;
+                }
+                else { // can capture enemy
+                    PossibleAttack[y][i] = true;
+                    break;
+                }
+            }
+
+            for (int i=x+1; i<8; i++) {  // color the right position where rook can move
+                if (getIcon(i, y).color.equals(status.color))
+                    break;
+                else if (getIcon(i,y).color.equals(PlayerColor.none))
+                    PossibleAttack[y][i] = true;
+                else {
+                    PossibleAttack[y][i] = true;
+                    break;
+                }
+            }
+
+            for (int i=y+1; i<8; i++) {  // color the down position where rook can move
+                if (getIcon(x, i).color.equals(status.color))
+                    break;
+                else if (getIcon(x, i).color.equals(PlayerColor.none))
+                    PossibleAttack[i][x] = true;
+                else {
+                    PossibleAttack[i][x] = true;
+                    break;
+                }
+            }
+
+            for (int i=y-1; i>=0; i--) {  // color the upper position where rook can move
+                if (getIcon(x, i).color.equals(status.color))
+                    break;
+                else if (getIcon(x, i).color.equals(PlayerColor.none))
+                    PossibleAttack[i][x] = true;
+                else {
+                    PossibleAttack[i][x] = true;
+                    break;
+                }
+            }
+        }
+
+        void NextAttackForKnight(Piece status, int x, int y) {
+            if ((x+1<8) && (y+2)<8 && !getIcon(x+1, y+2).color.equals(status.color)) PossibleAttack[y+2][x+1] = true;
+            if ((x+2<8) && (y+1)<8 && !getIcon(x+2, y+1).color.equals(status.color)) PossibleAttack[y+1][x+2] = true;
+            if ((x+2<8) && (y-1)>=0 && !getIcon(x+2, y-1).color.equals(status.color)) PossibleAttack[y-1][x+2] = true;
+            if ((x+1<8) && (y-2)>=0 && !getIcon(x+1, y-2).color.equals(status.color)) PossibleAttack[y-2][x+1] = true;
+            if (((x-1)>=0) && (y-2)>=0 && !getIcon(x-1, y-2).color.equals(status.color)) PossibleAttack[y-2][x-1] = true;
+            if (((x-2)>=0) && (y-1)>=0 && !getIcon(x-2, y-1).color.equals(status.color)) PossibleAttack[y-1][x-2] = true;
+            if (((x-2)>=0) && (y+1)<8 && !getIcon(x-2, y+1).color.equals(status.color)) PossibleAttack[y+1][x-2] = true;
+            if (((x-1)>=0) && (y+2)<8 && !getIcon(x-1, y+2).color.equals(status.color)) PossibleAttack[y+2][x-1] = true;
+        }
+
+        void NextAttackForBishop(Piece status, int x, int y) {
+            int i = 1;
+            while ((x+i<8) && (y+i<8)) {
+                if (getIcon(x+i, y+i).color.equals(status.color))
+                    break;
+                else if (getIcon(x+i, y+i).color.equals(PlayerColor.none))
+                    PossibleAttack[y+i][x+i] = true;
+                else {
+                    PossibleAttack[y+i][x+i] = true;
+                    break;
+                }
+                i++;
+            }
+            
+            i = 1;
+            while ((x-i>=0) && (y+i<8)) {
+                if (getIcon(x-i, y+i).color.equals(status.color))
+                    break;
+                else if (getIcon(x-i, y+i).color.equals(PlayerColor.none))
+                    PossibleAttack[y+i][x-i] = true;
+                else {
+                    PossibleAttack[y+i][x-i] = true;
+                    break;
+                }
+                i++;
+            }
+
+            i = 1;
+            while ((x-i>=0) && (y-i>=0)) {
+                if (getIcon(x-i, y-i).color.equals(status.color))
+                    break;
+                else if (getIcon(x-i, y-i).color.equals(PlayerColor.none))
+                    PossibleAttack[y-i][x-i] = true;
+                else {
+                    PossibleAttack[y-i][x-i] = true;
+                    break;
+                }
+                i++;
+            }
+
+            i = 1;
+            while ((x+i<8) && (y-i>=0)) {
+                if (getIcon(x+i, y-i).color.equals(status.color))
+                    break;
+                else if (getIcon(x+i, y-i).color.equals(PlayerColor.none))
+                    PossibleAttack[y-i][x+i] = true;
+                else {
+                    PossibleAttack[y-i][x+i] = true;
+                    break;
+                }
+                i++;
+            }
+        }
+
+        void NextAttackForKing(Piece status, int x, int y) {
+            if ((x+1<8) && (y+1)<8 && !getIcon(x+1, y+1).color.equals(status.color)) PossibleAttack[y+1][x+1] = true;
+            if ((x+1<8) && !getIcon(x+1, y).color.equals(status.color)) PossibleAttack[y][x+1] = true;
+            if ((x+1<8) && (y-1)>=0 && !getIcon(x+1, y-1).color.equals(status.color)) PossibleAttack[y-1][x+1] = true;
+            if ((y-1)>=0 && !getIcon(x, y-1).color.equals(status.color)) PossibleAttack[y-1][x] = true;
+            if (((x-1)>=0) && ((y-1)>=0) && !getIcon(x-1, y-1).color.equals(status.color)) PossibleAttack[y-1][x-1] = true;
+            if (((x-1)>=0) && !getIcon(x-1, y).color.equals(status.color)) PossibleAttack[y][x-1] = true;
+            if (((x-1)>=0) && (y+1)<8 && !getIcon(x-1, y+1).color.equals(status.color)) PossibleAttack[y+1][x-1] = true;
+            if (((y+1)<8) && !getIcon(x, y+1).color.equals(status.color)) PossibleAttack[y+1][x] = true;
+        }
+
+        void NextAttackForQueen(Piece status, int x, int y) {
+            NextAttackForRook(status, x, y);
+            NextAttackForBishop(status, x, y);
+            NextAttackForKing(status, x, y);
+        }
+
+        void NextAttack(Piece status, int x, int y) { // we have to call clearnextattack() before calling this
+            if (status.type.equals(PieceType.pawn)) {
+                NextAttackForPawn(status, x, y);
+            }
+            else if (status.type.equals(PieceType.rook)) {
+                NextAttackForRook(status, x, y);
+            } 
+
+            else if (status.type.equals(PieceType.knight)) {
+                NextAttackForKnight(status, x, y);
+            }
+            else if (status.type.equals(PieceType.bishop)) {
+                NextAttackForBishop(status, x, y);
+            }
+            else if (status.type.equals(PieceType.queen)) {
+                NextAttackForQueen(status, x, y);
+            }
+            else if (status.type.equals(PieceType.king)) {
+                NextAttackForKing(status, x, y);
+            }
+        }
+
+        void NextMove(Piece status, int x, int y) { // we have to call clearnextattack() before calling this function since we assign nextattack to  nextmove
+            NextAttack(status, x, y);
+            PossibleMove = PossibleAttack;
+            if (status.type.equals(PieceType.pawn)) { // special case of pawn : pawn has different nextmove and nextattack
+                if (status.color.equals(PlayerColor.black)) {
+                    if (x == 1 && getIcon(x+2, y).color.equals(PlayerColor.none) && getIcon(x+1, y).color.equals(PlayerColor.none))  // first move and there should be nothing in front of it to move two steps
+                        PossibleMove[y][x+2] = true;
+                    if ((x+1)<8)
+                        if (getIcon(x+1, y).color.equals(PlayerColor.none))
+                            PossibleMove[y][x+1] = true;
+                }
+                else { //white
+                    if (x == 6 && getIcon(x-2, y).color.equals(PlayerColor.none) && getIcon(x-1, y).color.equals(PlayerColor.none)) // first move
+                        PossibleMove[y][x-2] = true;
+                    if ((x-1)>=0)
+                        if (getIcon(x-1, y).color.equals(PlayerColor.none))
+                            PossibleMove[y][x-1] = true;
+                }
+            }
+        }
+
+        void ColorWay(Piece status, int x, int y) {
+            clearPossibleAttack();
+            NextMove(status, x, y);
+            System.out.println("-----------------------" + status.type);
+            for (int i=0; i<8; i++)
+                for (int j=0; j<8; j++)
+                    if (PossibleMove[j][i] == true) markPosition(i, j);
+        }
 	
 	class ButtonListener implements ActionListener{
 		int x;
@@ -229,191 +466,11 @@ public class ChessBoard {
 			this.y = y;
 		}
                 
-                public void ColorWayForPawn(Piece status, int x, int y) {
-                    if (status.color.equals(PlayerColor.black)) {
-                        if (x == 1 && getIcon(x+2, y).color.equals(PlayerColor.none) && getIcon(x+1, y).equals(PlayerColor.none)) // first move
-                            markPosition(x+2, y);
-                        if ((x+1)<8)
-                            if (getIcon(x+1, y).color.equals(PlayerColor.none))
-                                markPosition(x+1, y);
-                        if ((y-1)>=0 && (x+1)<8) {
-                            if (getIcon(x+1, y-1).color.equals(PlayerColor.white))
-                                markPosition(x+1, y-1);
-                        }
-                        if ((x+1)<8 && (y+1)<8) {
-                            if (getIcon(x+1, y+1).color.equals(PlayerColor.white))
-                                markPosition(x+1, y+1);
-                        }
-                    }
-                    else { //white
-                        if (x == 6 && getIcon(x-2, y).color.equals(PlayerColor.none)) // first move
-                            markPosition(x-2, y);
-                        if ((x-1)>=0)
-                            if (getIcon(x-1, y).color.equals(PlayerColor.none))
-                                markPosition(x-1, y);
-                        if ((y-1)>=0 && (x-1)>=0) {
-                            if (getIcon(x-1, y-1).color.equals(PlayerColor.black))
-                                markPosition(x-1, y-1);
-                        }
-                        if ((y+1)<8 && (x-1)>=0) {
-                            if (getIcon(x-1, y+1).color.equals(PlayerColor.black))
-                                markPosition(x-1, y+1);
-                        }
-                    }
-                }
 
-                public void ColorWayForRook(Piece status, int x, int y) {
-                    for (int i=x-1; i>=0; i--) {  // color the left positions where rook can move
-                        if (getIcon(i, y).color.equals(turn))
-                            break;
-                        else if (getIcon(i,y).color.equals(counterpart)) { // can capture enemy
-                            markPosition(i, y);
-                            break;
-                        }
-                        else
-                            markPosition(i, y);
-                    }
-
-                    for (int i=x+1; i<8; i++) {  // color the right position where rook can move
-                        if (getIcon(i, y).color.equals(turn))
-                            break;
-                        else if (getIcon(i,y).color.equals(counterpart)) { // can capture enemy
-                            markPosition(i, y);
-                            break;
-                        }
-                        else
-                            markPosition(i, y);
-                    }
-
-                    for (int i=y+1; i<8; i++) {  // color the down position where rook can move
-                        if (getIcon(x, i).color.equals(turn))
-                            break;
-                        else if (getIcon(x, i).color.equals(counterpart)) { // can capture enemy
-                            markPosition(x, i);
-                            break;
-                        }
-                        else
-                            markPosition(x, i);
-                    }
-
-                    for (int i=y-1; i>=0; i--) {  // color the upper position where rook can move
-                        if (getIcon(x, i).color.equals(turn))
-                            break;
-                        else if (getIcon(x, i).color.equals(counterpart)) { // can capture enemy
-                            markPosition(x, i);
-                            break;
-                        }
-                        else
-                            markPosition(x, i);
-                    }
-                }
-
-                public void ColorWayForKnight(Piece status, int x, int y) {
-                    if ((x+1<8) && (y+2)<8 && !getIcon(x+1, y+2).color.equals(turn)) markPosition(x+1, y+2);
-                    if ((x+2<8) && (y+1)<8 && !getIcon(x+2, y+1).color.equals(turn)) markPosition(x+2, y+1);
-                    if ((x+2<8) && (y-1)>=0 && !getIcon(x+2, y-1).color.equals(turn)) markPosition(x+2, y-1);
-                    if ((x+1<8) && (y-2)>=0 && !getIcon(x+1, y-2).color.equals(turn)) markPosition(x+1, y-2);
-                    if (((x-1)>=0) && (y-2)>=0 && !getIcon(x-1, y-2).color.equals(turn)) markPosition(x-1, y-2);
-                    if (((x-2)>=0) && (y-1)>=0 && !getIcon(x-2, y-1).color.equals(turn)) markPosition(x-2, y-1);
-                    if (((x-2)>=0) && (y+1)<8 && !getIcon(x-2, y+1).color.equals(turn)) markPosition(x-2, y+1);
-                    if (((x-1)>=0) && (y+2)<8 && !getIcon(x-1, y+2).color.equals(turn)) markPosition(x-1, y+2);
-                }
-
-                public void ColorWayForBishop(Piece status, int x, int y) {
-                    int i = 1;
-                    while ((x+i<8) && (y+i<8)) {
-                        if (getIcon(x+i, y+i).color.equals(turn))
-                            break;
-                        else if (getIcon(x+i, y+i).color.equals(counterpart)) { // can capture enemy
-                            markPosition(x+i, y+i);
-                            break;
-                        }
-                        else
-                            markPosition(x+i, y+i);
-                        i++;
-                    }
-                    
-                    i = 1;
-                    while ((x-i>=0) && (y+i<8)) {
-                        if (getIcon(x-i, y+i).color.equals(turn))
-                            break;
-                        else if (getIcon(x-i, y+i).color.equals(counterpart)) { // can capture enemy
-                            markPosition(x-i, y+i);
-                            break;
-                        }
-                        else
-                            markPosition(x-i, y+i);
-                        i++;
-                    }
-
-                    i = 1;
-                    while ((x-i>=0) && (y-i>=0)) {
-                        if (getIcon(x-i, y-i).color.equals(turn))
-                            break;
-                        else if (getIcon(x-i, y-i).color.equals(counterpart)) { // can capture enemy
-                            markPosition(x-i, y-i);
-                            break;
-                        }
-                        else
-                            markPosition(x-i, y-i);
-                        i++;
-                    }
-
-                    i = 1;
-                    while ((x+i<8) && (y-i>=0)) {
-                        if (getIcon(x+i, y-i).color.equals(turn))
-                            break;
-                        else if (getIcon(x+i, y-i).color.equals(counterpart)) { // can capture enemy
-                            markPosition(x+i, y-i);
-                            break;
-                        }
-                        else
-                            markPosition(x+i, y-i);
-                        i++;
-                    }
-                }
-
-                public void ColorWayForKing(Piece status, int x, int y) {
-                    if ((x+1<8) && (y+1)<8 && !getIcon(x+1, y+1).color.equals(turn)) markPosition(x+1, y+1);
-                    if ((x+1<8) && !getIcon(x+1, y).color.equals(turn)) markPosition(x+1, y);
-                    if ((x+1<8) && (y-1)>=0 && !getIcon(x+1, y-1).color.equals(turn)) markPosition(x+1, y-1);
-                    if ((y-1)>=0 && !getIcon(x, y-1).color.equals(turn)) markPosition(x, y-1);
-                    if (((x-1)>=0) && ((y-1)>=0) && !getIcon(x-1, y-1).color.equals(turn)) markPosition(x-1, y-1);
-                    if (((x-1)>=8) && !getIcon(x-1, y).color.equals(turn)) markPosition(x-1, y);
-                    if (((x-1)>=8) && (y+1)<8 && !getIcon(x-1, y+1).color.equals(turn)) markPosition(x-1, y+1);
-                    if (((y+1)<8) && !getIcon(x, y+1).color.equals(turn)) markPosition(x, y+1);
-                }
-
-                public void ColorWayForQueen(Piece status, int x, int y) {
-                    ColorWayForRook(status, x, y);
-                    ColorWayForBishop(status, x, y);
-                    ColorWayForKing(status, x, y);
-                }
-
-                public void ColorWay(Piece status, int x, int y) {
-                    if (status.type.equals(PieceType.pawn)) {
-                        ColorWayForPawn(status, x, y);
-                    }
-                    else if (status.type.equals(PieceType.rook)) {
-                        ColorWayForRook(status, x, y);
-                    } 
-
-                    else if (status.type.equals(PieceType.knight)) {
-                        ColorWayForKnight(status, x, y);
-                    }
-                    else if (status.type.equals(PieceType.bishop)) {
-                        ColorWayForBishop(status, x, y);
-                    }
-                    else if (status.type.equals(PieceType.queen)) {
-                        ColorWayForQueen(status, x, y);
-                    }
-                    else if (status.type.equals(PieceType.king)) {
-                        ColorWayForKing(status, x, y);
-                    }
-                }
-
-		public void actionPerformed(ActionEvent e) {	// Only modify here
+		public void actionPerformed(ActionEvent e) {	// only modify here
 			// (x, y) is where the click event occured
+                    ChessBoard.this.printBoardStatus();
+                    ChessBoard.this.printBoardColor();
                     Piece status = getIcon(x, y); 
                     if (selected == false) {
                         if (status.color.equals(turn)) {
@@ -426,23 +483,24 @@ public class ChessBoard {
 
                     else { // if user choosed one to move(the way where can move is marked on the board)
                         if (chessBoardSquares[y][x].getBackground().equals(Color.pink)) {
-                            System.out.println("selected: ("+selX+","+selY+")");
-                            System.out.println("clicked: ("+x+","+y+")");
-                            status.type = getIcon(selX, selY).type;
-                            status.color = getIcon(selX, selY).color;
-                            getIcon(selX, selY).type = PieceType.none;
-                            getIcon(selX, selY).color = PlayerColor.none;
+                            //system.out.println("selected: ("+selx+","+sely+")");
+                            //system.out.println("clicked: ("+x+","+y+")");
+                            ChessBoard.this.move(selX, selY, x, y);
+                            //system.out.println("seticon: ("+x+","+y+","+status.type+")");
                             ChessBoard.this.setIcon(x, y, status);
-                            System.out.println("setIcon: ("+x+","+y+","+status.type+")");
                             ChessBoard.this.setIcon(selX, selY, getIcon(selX,selY));
-                            ChessBoard.this.printBoardStatus();
                             selected = false;
                             PlayerColor tmp;
                             tmp = counterpart;
                             counterpart = turn;
                             turn = tmp;
-                            setStatus(turn + "'s turn");
-                            System.out.println("next turn: " + turn);
+                            String s = new String(turn + "'" + "s turn");
+                            if (isCheckMate())
+                            	s = s + "| CheckMate";
+                            else if (isCheck())
+                            	s = s + "| Check";
+                            setStatus(s);
+                            //System.out.println("next turn: " + turn);
                         }
                         for(int i=0;i<8;i++){
                                 for(int j=0;j<8;j++) unmarkPosition(i, j);
@@ -455,10 +513,110 @@ public class ChessBoard {
                     }
 		}
 	}
+
+        void move(int startX, int startY, int dstX, int dstY) {
+            getIcon(dstX, dstY).type = getIcon(startX, startY).type;
+            getIcon(dstX, dstY).color = getIcon(startX, startY).color;
+            getIcon(startX, startY).type = PieceType.none;
+            getIcon(startX, startY).color = PlayerColor.none;
+        }
+        
+        /*boolean isCheck(Piece status, int x, int y) { // if you don't escape the king will be captured
+            ClearPossibleAttack();
+            NextMove(getIcon(x, y), x, y);
+                for(int i=0;i<8;i++) 
+                    for(int j=0;j<8;j++) {
+                        if (PossibleMove[j][i].equals(true))
+                            move(x, y, i, j);
+                            isCheck(getIcon
+           ClearPossibleAttack();
+            NextAttack(status, x, y);
+                for(int i=0;i<8;i++){
+                    for(int j=0;j<8;j++) 
+                        if (PossibleAttack[j][i] == true && getIcon(i, j).type.equals(PieceType.king) && getIcon(i, j).color.equals(counterpart)) {
+                            check = true;
+                            return true;
+                        }
+                }
+            check = false;
+            return false;
+        } */
+        
+        boolean canCaptureKing(int x, int y, PlayerColor turn) {
+            clearPossibleAttack();
+            NextMove(getIcon(x, y), x, y);
+            for(int i=0;i<8;i++) {
+                for(int j=0;j<8;j++) {
+                    if (PossibleMove[j][i] == true && getIcon(i, j).type.equals(PieceType.king) /*&& getIcon(i, j).color.equals(turn)*/) {
+                    	System.out.println("!!!!!!!!!!!!!!!1" + getIcon(i, j).color);
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
+        boolean isCheck() { // if you don't escape the king will be captured
+            for(int i=0;i<8;i++) {
+                for(int j=0;j<8;j++) {
+                    if (getIcon(i, j).color.equals(counterpart)){
+                        if (canCaptureKing(i, j, turn) == true) {
+                            check = true;
+                            return true;
+                        }
+                    }
+                }
+            }
+            check = false;
+            return false;
+        }
+        
+        boolean StillChecked(int x, int y) { // move to anywhere that can go and check whether still checked
+            clearPossibleAttack();
+            NextMove(getIcon(x, y), x, y);
+            for(int i=0;i<8;i++) {
+                for(int j=0;j<8;j++) {
+                    if (PossibleMove[j][i] == true) {
+                        Piece tmp = getIcon(i, j);
+                        move(x, y, i, j);
+                        if (isCheck() == false) {
+                            undo(x, y, i, j, tmp);
+                            return false;
+                        }
+                        undo(x, y, i, j, tmp);
+                    }
+                }
+            }
+            return true;
+        }
+        
+        void undo(int x, int y, int i, int j, Piece tmp) { // getICon(i, j) was overwritten by move(x, y, i, j)
+            getIcon(x, y).type = getIcon(i, j).type;
+            getIcon(x, y).color = getIcon(i, j).color;
+            getIcon(i, j).type = tmp.type;
+            getIcon(i, j).color = tmp.color;
+        }
+            
+        boolean isCheckMate() {
+            if (isCheck() == false)
+                return false;
+            else {
+                for(int i=0;i<8;i++) {
+                    for(int j=0;j<8;j++) {
+                        if (getIcon(i, j).color.equals(turn))  // move all my PieceTypes
+                            if (StillChecked(i, j) == false)
+                                return false;
+                    }
+                }
+                return true;
+            }
+        }
 	
 	void onInitiateBoard(){
             turn = PlayerColor.black; // black starts first
             counterpart = PlayerColor.white;
+            check = false;
+            checkmate = false;
             setStatus(turn + "'s turn");
 	}
 }
