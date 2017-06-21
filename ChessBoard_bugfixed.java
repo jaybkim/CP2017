@@ -611,9 +611,8 @@ public class ChessBoard {
         }
 	
 	void onInitiateBoard(){
-            //turn = PlayerColor.black; // black starts first
-        	turn = PlayerColor.white;
-            counterpart = PlayerColor.black;
+            turn = PlayerColor.black; // black starts first
+            counterpart = PlayerColor.white;
             check = false;
             checkmate = false;
             setStatus(turn + "'s turn");
